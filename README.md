@@ -4,6 +4,14 @@
 
 See the [Earlybirds doc](doc.early-birds.fr).
 
+## Tests
+
+To run the tests
+```bash
+$ npm install
+$ npm test
+```
+
 ## Installation
 
 To install the library, just paste the following code into the <head> section of your HTML page.
