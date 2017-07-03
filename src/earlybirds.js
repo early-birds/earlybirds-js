@@ -78,6 +78,9 @@ class Eb {
         newProfile.cookie = response.cookie;
       }
       Cookies.setCookie('eb-profile', JSON.stringify(newProfile));
+    })
+    .catch((err) => {
+     // console.log(err);
     });
   }
 }
