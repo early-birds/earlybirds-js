@@ -1,6 +1,4 @@
-import $ from 'jquery';
 import axios from 'axios';
-import _ from 'lodash';
 import { isEqual } from 'lodash/fp';
 
 import Cookies from './utils/Cookies';
@@ -12,7 +10,7 @@ class Eb {
     this.trackerKey = null;
     this.defaultProfile = {
       hash: null,
-      lastIdentify: null
+      lastIdentify: null,
     };
   }
 
@@ -23,18 +21,7 @@ class Eb {
   }
 
   identify(profile) {
-
-    let cookieEbProfile = JSON.parse(Cookies.getCookie('eb-profile')) || this.defaultProfile;
-
-    if (noCookie.apply(this) || lastIdentifyOutdated() || profileHasChanged()) {
-      console.log('identify');
-      return this._identify(profile);
-    }
-    else {
-      console.log('do nothing');
-      return new Promise(r => r());
-    }
-
+    const cookieEbProfile = JSON.parse(Cookies.getCookie('eb-profile')) || this.defaultProfile;
     function noCookie() {
       return isEqual(cookieEbProfile, this.defaultProfile);
     }
@@ -47,13 +34,17 @@ class Eb {
     }
 
     function profileHasChanged() {
-      let hashProfile = Hashcode.encode(profile);
+      const hashProfile = Hashcode.encode(profile);
       return !isEqual(cookieEbProfile.hash, hashProfile);
     }
+
+    if (noCookie.apply(this) || lastIdentifyOutdated() || profileHasChanged()) {
+      return this.identifyRequest(profile);
+    }
+    return new Promise(r => r());
   }
 
   trackActivity(activity) {
-
     return axios({
       method: 'post',
       url: `http://api.early-birds.fr/tracker/${this.trackerKey}/activity`,
@@ -61,35 +52,33 @@ class Eb {
         activity: [{
           original_id: activity.original_id,
           verb: activity.verb,
-          profile: this.profile.id
+          profile: this.profile.id,
         }],
-      }
+      },
     });
   }
 
   // private
 
-  _identify(profile) {
+  identifyRequest(profile) {
     return axios({
       method: 'post',
       url: `http://api.early-birds.fr/tracker/${this.trackerKey}/identify`,
-      data: {
-        profile: profile
-      }
+      data: { profile },
     })
     .then((response) => {
-      let _profile = {
+      const newProfile = {
         ...response.data.profile,
         lastIdentify: new Date().getTime(),
-        hash: Hashcode.encode(profile)
-      }
+        hash: Hashcode.encode(profile),
+      };
       if (response.cookie &&
         response.cookie.domain &&
-        document.location.hostname.indexOf(result.cookie.domain) >= 0) {
-        _profile.cookie = response.cookie;
+        document.location.hostname.indexOf(response.cookie.domain) >= 0) {
+        newProfile.cookie = response.cookie;
       }
-      Cookies.setCookie('eb-profile', JSON.stringify(_profile));
-    })
+      Cookies.setCookie('eb-profile', JSON.stringify(newProfile));
+    });
   }
 }
 
