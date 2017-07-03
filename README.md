@@ -1,35 +1,55 @@
 # Earlybird SDK for JavaScript
 
-# Getting Started
+### Documentation API
 
-## Install
-TO DO
-#### Frontend
+See the [Earlybirds doc](doc.early-birds.fr).
 
-You can either use a package manager like npm or include a `<script>` tag.
+## Installation
 
-#### Node.js / React Native / Browserify / webpack
-
-We are [browserify](http://browserify.org/)able and [webpack](http://webpack.github.io/) friendly.
-
-```sh
-npm install algoliasearch --save
+To install the library, just paste the following code into the <head> section of your HTML page.
+```js
+<script>
+  (function () {
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = true;
+    s.src = 'http://xxx.com/sdk.js';
+    var x = document.getElementsByTagName('script')[0];
+    x.parentNode.insertBefore(s, x);
+  })();
+</script>
 ```
+    
+## init()
 
-#### Bower
-
-TO DO
-
-### Initialize the client
-
-You first need to initialize the client. For that you need your **TRACKER KEY** and **DATASROUCE ID**.
+First, you need to initialize the client with a **TRACKER KEY**.
 
 ```js
 w.eb = new Eb();
 w.eb.init('[TRACKER_KEY]');
-var profile = {
-    datasources: [{
-        id: '[DATASOURCE_ID]'
-    },
+```
+
+## identify(profile)
+Then, you need to identify the user by providing a profile object with at least a **datasources** key.
+
+```js
+const profile = {
+  datasources: [{
+      id: '[DATASOURCE_ID]'
+  }]
 }
+w.eb.identify(profile);
+```
+
+## trackActivity(options)
+
+Track an activity with the givens options.
+
+```js
+  w.eb.trackActivity({
+    original_id: '[XX]',
+    quantity: '[QUANTITY]',
+    price: '[PRICE]',
+    verb: '[view | add-to-cart | buy | like | disklike | click-on-reco]'
+  })
 ```
