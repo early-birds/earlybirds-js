@@ -1,0 +1,33 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "globals": {
+    "angular": true,
+    "$rootScope": true,
+    "_": true,
+    "moment": true,
+    "document": true,
+    "parseInt": true,
+    "window": true,
+    "async": true,
+    "$": true,
+    "Math": true,
+    "chrome": true,
+    "localStorage": true,
+    "WebSocket": true,
+    "eb": true,
+    "jQuery": true,
+    "CustomEvent": true,
+    "XMLHttpRequest": true,
+    "sendToBackground": true
+  },
+  "rules": {
+    "lines-around-comment": 0,
+    "max-len": ["error", 120],
+    "no-param-reassign": 0,
+    "no-plusplus": 0,
+    "no-underscore-dangle": ["error", { "allow": ["_id"] }],
+    "radix": 0,
+    "consistent-return": 0
+  }
+}
