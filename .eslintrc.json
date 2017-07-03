@@ -3,6 +3,8 @@
   "extends": "airbnb",
   "globals": {
     "_": true,
+    "test": true,
+    "expect": true,
     "document": true,
     "parseInt": true,
     "window": true,
