@@ -8,8 +8,7 @@ describe('test test', () => {
 
   test('Identify should return a promise', () => {
     let fakeTrackerKey = 'fakeTrackerKey';
-    mock.onPost(`http://api.early-birds.fr/tracker/fakeTrackerKey/identify`).reply(200, {
-    });
+    mock.onPost(`http://api.early-birds.fr/tracker/fakeTrackerKey/identify`).reply(200, {});
     const eb = new Eb();
     eb.init(fakeTrackerKey);
     const identifyReturnValue = eb.identify({});

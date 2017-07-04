@@ -1,12 +1,16 @@
 import axios from 'axios';
 import { isEqual } from 'lodash/fp';
+import Config from '../config';
 
 import Cookies from './utils/Cookies';
 import Hashcode from './utils/Hashcode';
 
+const HTTP_PROTOCOL     = (document.location.protocol == 'https:' ? 'https://' : 'http://');
+
 class Eb {
 
   constructor() {
+
     this.trackerKey = null;
     this.defaultProfile = {
       hash: null,
@@ -63,7 +67,7 @@ class Eb {
   identifyRequest(profile) {
     return axios({
       method: 'post',
-      url: `http://api.early-birds.fr/tracker/${this.trackerKey}/identify`,
+      url: `${HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/identify`,
       data: { profile },
     })
     .then((response) => {
