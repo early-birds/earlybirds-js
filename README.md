@@ -38,13 +38,17 @@ w.eb.init('[TRACKER_KEY]');
 ```
 
 ## identify(profile)
-Then, you need to identify the user by providing a profile object with at least a **datasources** key.
+Then, you need to identify the user by providing a profile object.
+See the [Earlybirds doc (identify workflow)](http://doc.early-birds.fr/images/identify.png).
+
 
 ```js
 const profile = {
   datasources: [{
-      id: '[DATASOURCE_ID]'
-  }]
+    id: '[DATASOURCE_ID]',
+    original_id: '[ORIGINAL_ID]'
+  }],
+  email: '[EMAIL]',
 }
 w.eb.identify(profile);
 ```
