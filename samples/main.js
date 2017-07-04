@@ -10,12 +10,11 @@ import Eb from '../src/earlybirds';
     }
     w.eb.identify(profile)
     .then(() => {
-      /*
-             w.eb.trackActivity({
-             original_id : 'TROI075',
-             verb: 'view'
-             });
-             */
+      w.eb.getRecommendations('[WIDGET_ID]');
+      w.eb.trackActivity({
+        original_id : '[ORIGINAL_ID]',
+        verb: '[VERB]'
+      });
     });
 })(window);
 
