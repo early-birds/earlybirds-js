@@ -3,9 +3,16 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
 var mock = new MockAdapter(axios);
-mock.onPost().reply(200, {});
 
-test('Identify should return a promise', () => {
-  const identifyReturnValue = new Eb().identify({});
-  expect(identifyReturnValue.then).toBeDefined();
+describe('test test', () => {
+
+  test('Identify should return a promise', () => {
+    let fakeTrackerKey = 'fakeTrackerKey';
+    mock.onPost(`http://api.early-birds.fr/tracker/fakeTrackerKey/identify`).reply(200, {
+    });
+    const eb = new Eb();
+    eb.init(fakeTrackerKey);
+    const identifyReturnValue = eb.identify({});
+    expect(identifyReturnValue.then).toBeDefined();
+  });
 });
