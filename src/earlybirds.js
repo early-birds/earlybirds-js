@@ -51,7 +51,7 @@ class Eb {
   trackActivity(activity) {
     return axios({
       method: 'post',
-      url: `http://api.early-birds.fr/tracker/${this.trackerKey}/activity`,
+      url: `${HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/activity`,
       data: {
         activity: [{
           original_id: activity.original_id,
