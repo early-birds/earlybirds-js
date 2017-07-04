@@ -24,7 +24,9 @@ class Eb {
     this.trackerKey = trackerKey;
   }
 
-  identify(profile) {
+  identify(profile, options = {
+    cookieDuration: 90  // default to 3 months
+  }) {
     const cookieEbProfile = JSON.parse(Cookies.getCookie('eb-profile')) || this.defaultProfile;
     function noCookie() {
       return isEqual(cookieEbProfile, this.defaultProfile);
@@ -43,7 +45,11 @@ class Eb {
     }
 
     if (noCookie.apply(this) || lastIdentifyOutdated() || profileHasChanged()) {
-      return this.identifyRequest(profile);
+      console.log('identify');
+      return this.identifyRequest(profile, options);
+    }
+    else {
+      console.log('do nothing');
     }
     return new Promise(r => r());
   }
@@ -64,7 +70,8 @@ class Eb {
 
   // private
 
-  identifyRequest(profile) {
+  identifyRequest(profile, options) {
+    let cookieDuration = options.cookieDuration;
     return axios({
       method: 'post',
       url: `${HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/identify`,
@@ -80,8 +87,10 @@ class Eb {
         response.cookie.domain &&
         document.location.hostname.indexOf(response.cookie.domain) >= 0) {
         newProfile.cookie = response.cookie;
+        console.log('reset cookie');
+        cookieDuration = response.cookie.expires || cookieDuration;
       }
-      Cookies.setCookie('eb-profile', JSON.stringify(newProfile));
+      Cookies.setCookie('eb-profile', JSON.stringify(newProfile), cookieDuration);
     })
     .catch((err) => {
      // console.log(err);
