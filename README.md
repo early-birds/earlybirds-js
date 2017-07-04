@@ -65,3 +65,10 @@ Track an activity with the givens options.
     verb: '[view | add-to-cart | buy | like | disklike | click-on-reco]'
   })
 ```
+## getRecommendations(widgetId, options)
+
+Retrieve a list of recommendations for a given widget
+
+```js
+  w.eb.getRecommendations('[WIDGET_ID]', {})
+```
