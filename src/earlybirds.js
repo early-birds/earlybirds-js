@@ -16,6 +16,7 @@ class Eb {
       hash: null,
       lastIdentify: null,
     };
+    this.profile = JSON.parse(Cookies.getCookie('eb-profile'));
   }
 
   // public
@@ -87,10 +88,23 @@ class Eb {
         response.cookie.domain &&
         document.location.hostname.indexOf(response.cookie.domain) >= 0) {
         newProfile.cookie = response.cookie;
-        console.log('reset cookie');
         cookieDuration = response.cookie.expires || cookieDuration;
       }
       Cookies.setCookie('eb-profile', JSON.stringify(newProfile), cookieDuration);
+    })
+    .catch((err) => {
+     // console.log(err);
+    });
+  }
+
+  getRecommendations(widgetId, options) {
+    
+    return axios({
+      method: 'GET',
+      url: `${HTTP_PROTOCOL}${Config.API_URL}/widget/${widgetId}/recommendations/${this.profile.id}`,
+    })
+    .then((response) => {
+      console.log(response);
     })
     .catch((err) => {
      // console.log(err);
