@@ -16,42 +16,32 @@ class Eb {
       hash: null,
       lastIdentify: null,
     };
-    this.profile = JSON.parse(Cookies.getCookie('eb-profile'));
+    const cookieContent = Cookies.getCookie('eb-profile');
+    this.profile = cookieContent ? JSON.parse(cookieContent) : null;
   }
 
   // public
 
   init(trackerKey) {
     this.trackerKey = trackerKey;
+    return this;
   }
 
   identify(profile, options = {
     cookieDuration: 90  // default to 3 months
   }) {
-    const cookieEbProfile = JSON.parse(Cookies.getCookie('eb-profile')) || this.defaultProfile;
-    function noCookie() {
-      return isEqual(cookieEbProfile, this.defaultProfile);
-    }
+    const cookieContent = Cookies.getCookie('eb-profile');
+    const cookie = cookieContent ? JSON.parse(cookieContent) : this.defaultProfile;
 
-    function lastIdentifyOutdated() {
-      if (!cookieEbProfile || !cookieEbProfile.lastIdentify) {
-        return true;
-      }
-      return new Date().getTime() - cookieEbProfile.lastIdentify > 1000 * 60 * 60;
-    }
-
-    function profileHasChanged() {
-      const hashProfile = Hashcode.encode(profile);
-      return !isEqual(cookieEbProfile.hash, hashProfile);
-    }
-
-    if (noCookie.apply(this) || lastIdentifyOutdated() || profileHasChanged()) {
+    /*
+    if (this.noCookie(cookie) || this.lastIdentifyOutdated(cookie, 1000 * 60 * 60) || this.profileHasChanged(cookie)) {
       console.log('identify');
       return this.identifyRequest(profile, options);
     }
     else {
       console.log('do nothing');
     }
+    */
     return new Promise(r => r());
   }
 
@@ -70,6 +60,22 @@ class Eb {
   }
 
   // private
+  noCookieEbProfile(cookie) {
+    console.log(cookie);
+    return isEqual(cookie, this.defaultProfile);
+  }
+
+  lastIdentifyIsOutdated(cookie, duration) {
+    if (!cookie || !cookie.lastIdentify) {
+      return true;
+    }
+    return new Date().getTime() - cookie.lastIdentify > duration;
+  }
+
+  profileHasChanged(cookie) {
+    const hashProfile = Hashcode.encode(profile);
+    return !isEqual(cookie.hash, hashProfile);
+  }
 
   identifyRequest(profile, options) {
     let cookieDuration = options.cookieDuration;
