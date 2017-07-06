@@ -4,6 +4,7 @@ import { isEqual } from 'lodash/fp';
 
 import Eb from './earlybirds';
 import Cookies from './utils/Cookies';
+import Hashcode from './utils/Hashcode';
 import MockAdapter from 'axios-mock-adapter';
 import Config from '../config';
 
@@ -70,6 +71,21 @@ describe('lastIdentifyIsOutdated()', () => {
   test('should be falsy if lastIdentify is lower than duration', () => {
     const res = eb.lastIdentifyIsOutdated(fakeCookie, 20);
     expect(res).toBeFalsy();
+  });
+});
+
+describe('profileHasChanged()', () => {
+
+  const eb = new Eb();
+  Hashcode.encode = jest.fn(() => { return 'fakeHash' });
+
+  test('should be falsy if given profile hash matches cookie hash', () => {
+    const res = eb.profileHasChanged({ hash: 'fakeHash' }, '');
+    expect(res).toBeFalsy();
+  });
+  test('should be truthy if given profile hash doesn\'t matches cookie hash', () => {
+    const res = eb.profileHasChanged({ hash: 'differentFakeHash' }, '');
+    expect(res).toBeTruthy();
   });
 });
 
