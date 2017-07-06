@@ -33,15 +33,13 @@ class Eb {
     const cookieContent = Cookies.getCookie('eb-profile');
     const cookie = cookieContent ? JSON.parse(cookieContent) : this.defaultProfile;
 
-    /*
-    if (this.noCookie(cookie) || this.lastIdentifyOutdated(cookie, 1000 * 60 * 60) || this.profileHasChanged(cookie)) {
+    if (this.noCookieEbProfile(cookie) || this.lastIdentifyOutdated(cookie, 1000 * 60 * 60) || this.profileHasChanged(cookie, profile)) {
       console.log('identify');
       return this.identifyRequest(profile, options);
     }
     else {
       console.log('do nothing');
     }
-    */
     return new Promise(r => r());
   }
 
@@ -61,7 +59,6 @@ class Eb {
 
   // private
   noCookieEbProfile(cookie) {
-    console.log(cookie);
     return isEqual(cookie, this.defaultProfile);
   }
 
@@ -72,7 +69,7 @@ class Eb {
     return new Date().getTime() - cookie.lastIdentify > duration;
   }
 
-  profileHasChanged(cookie) {
+  profileHasChanged(cookie, profile) {
     const hashProfile = Hashcode.encode(profile);
     return !isEqual(cookie.hash, hashProfile);
   }

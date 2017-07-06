@@ -5,6 +5,7 @@
   "main": "Gulpfile.js",
   "scripts": {
     "start": "webpack-dev-server --content-base build",
+    "build": "webpack --content-base build",
     "test": "jest --watchAll --verbose"
   },
   "author": "",

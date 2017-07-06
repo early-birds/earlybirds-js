@@ -90,18 +90,11 @@ describe('profileHasChanged()', () => {
 });
 
 describe('identify()', () => {
-
-  beforeEach(() => {
-    Cookies.getCookie = jest.fn();
-    Cookies.setCookie = jest.fn();
-  });
-
   test('should return a promise', () => {
     const eb = new Eb();
     const res = eb.identify();
     expect(res.then).toBeDefined();
   });
-
 });
 
 describe('getRecommendations()', () => {
