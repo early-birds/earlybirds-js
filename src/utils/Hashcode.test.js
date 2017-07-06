@@ -1,10 +1,12 @@
 const Hashcode = require('./Hashcode');
 
-test('Hashcode', () => {
-  const fooBarHash = -884432774;
-  const encoded = Hashcode.encode({
-    foo: 'bar',
-    bar: 'foo',
+describe('Hashcode', () => {
+  test('should encode an object properly', () => {
+    const fooBarPrecalculatedHash = -884432774;
+    const encoded = Hashcode.encode({
+      foo: 'bar',
+      bar: 'foo',
+    });
+    expect(encoded).toBe(fooBarPrecalculatedHash);
   });
-  expect(encoded).toBe(fooBarHash);
 });
