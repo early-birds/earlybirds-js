@@ -1,14 +1,24 @@
 class Cookies {
 
-  static getCookie(name) {
+  static retrieveCookie(name) {
     const nameEQ = `${name}=`;
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      }
+  }
+
+  static getCookie(name) {
+    const retrievedCookie = this.retrieveCookie(name)
+    let data;
+    try {
+        data = JSON.parse(retrievedCookie);
+    } catch (e) {
+        return retrievedCookie;
     }
-    return null;
+    return data;
   }
 
   static setCookie(name, value, days) {

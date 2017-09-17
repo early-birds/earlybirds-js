@@ -1,5 +1,4 @@
 import axios from 'axios';
-import sinon from 'sinon';
 import { isEqual } from 'lodash/fp';
 
 import Eb from './earlybirds';
@@ -95,7 +94,54 @@ describe('identify()', () => {
     const res = eb.identify();
     expect(res.then).toBeDefined();
   });
+
+  test('should set profile property', () => {
+    let fakeTrackerKey = 'fakeTrackerKey';
+    const fakeProfile = {
+      hash: null,
+      lastIdentify: null,
+    };
+    mock.onPost(`${HTTP_PROTOCOL}${Config.API_URL}/tracker/fakeTrackerKey/identify`).reply(200, { profile: fakeProfile });
+    const eb = new Eb();
+    eb.init(fakeTrackerKey);
+    eb.identify(fakeProfile)
+    .then(() => {
+    });
+  });
 });
 
 describe('getRecommendations()', () => {
+  let fakeTrackerKey = 'fakeTrackerKey';
+  mock.onGet(`${HTTP_PROTOCOL}${Config.API_URL}/widget/fakeWidgetId/recommendations/fakeProfileId`).reply(200, {});
+
+  describe('should handle profile properly', () => {
+    test('should reject if profile is null', () => {
+      let eb = new Eb()
+      eb.profile = null;
+      eb.identify()
+        .then(() => {
+          return eb.getRecommendations('fakeWidgetId')
+        })
+        .catch((e) => {
+          return expect(e.toString()).toEqual('no profile');
+        })
+        .catch((m) => {
+        });
+    });
+    test('should resolve if profile is present', () => {
+      let eb = new Eb()
+      eb.profile = { 
+        id: 'fakeProfileId'
+      };
+      eb.identify()
+        .then(() => {
+          return eb.getRecommendations('fakeWidgetId')
+        })
+        .then((t) => {
+          expect(t).toBeTruthy();
+        })
+        .catch((m) => {
+        });
+    });
+  });
 });
