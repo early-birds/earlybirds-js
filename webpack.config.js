@@ -18,7 +18,6 @@ module.exports = {
       query: {
         plugins: [
           ['lodash'],
-          ['transform-react-jsx', { pragma: 'h' }]
         ],
         presets: ['es2015', 'stage-2'],
       }
