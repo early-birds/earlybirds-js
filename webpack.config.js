@@ -1,8 +1,12 @@
 const webpack = require('webpack')
 const path = require('path')
+//var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 
 module.exports = {
-  entry: './index.js',
+  entry: [
+    './index.js'
+  ],
   output: {
     path: path.resolve(__dirname, 'build'),
     publicPath: "/assets/",
@@ -10,6 +14,7 @@ module.exports = {
     libraryTarget: 'commonjs2',
     library: 'Eb',
   },
+//  plugins: [new BundleAnalyzerPlugin()],
   module: {
     loaders: [{
       test: /\.js$/,

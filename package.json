@@ -25,12 +25,14 @@
     "babel-preset-stage-2": "^6.24.1",
     "jest-cli": "^20.0.4",
     "webpack": "^3.0.0",
+    "webpack-bundle-analyzer": "^2.9.0",
     "webpack-livereload-plugin": "^0.11.0"
   },
   "dependencies": {
     "axios": "^0.16.2",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-polyfill": "^6.23.0",
-    "lodash.isequal": "^4.5.0"
+    "lodash.isequal": "^4.5.0",
+    "whatwg-fetch": "^2.0.3"
   }
 }
