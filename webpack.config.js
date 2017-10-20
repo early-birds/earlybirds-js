@@ -8,7 +8,7 @@ module.exports = {
     './index.js'
   ],
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'dist'),
     publicPath: "/assets/",
     filename: 'bundle.js',
     libraryTarget: 'commonjs2',

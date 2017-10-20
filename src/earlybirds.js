@@ -16,12 +16,11 @@ function Eb(options) {
     hash: null,
     lastIdentify: null,
   };
-  console.log(Cookies)
   this.profile = Cookies.getCookie('eb-profile');
-  console.log(options);
   if (options && options.trackerKey) {
     this.init(options.trackerKey)
   }
+  return this;
 }
 Eb.prototype.init = function(trackerKey) {
   this.trackerKey = trackerKey;
@@ -35,7 +34,6 @@ Eb.prototype.identify = function(profile, options = {
   if (this.noCookieEbProfile(cookie) ||
       this.lastIdentifyIsOutdated(cookie, 1000 * 60 * 60) ||
         this.profileHasChanged(cookie, profile)) {
-    console.log('initiate identify request')
   return this.identifyRequest(profile, options);
   }
   else {
@@ -50,6 +48,7 @@ Eb.prototype.identify = function(profile, options = {
 }
 
 Eb.prototype.trackActivity = function(activity) {
+  /*
   return axios({
     method: 'post',
     url: `${HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/activity`,
@@ -61,6 +60,19 @@ Eb.prototype.trackActivity = function(activity) {
       }],
     },
   });
+  */
+
+  return fetch(`${HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/activity`, {
+    method: 'post',
+    body: JSON.stringify({
+      activity: [{
+        original_id: activity.original_id,
+        verb: activity.verb,
+        profile: this.profile.id,
+      }],
+    })
+  })
+  console.log('call to track activity');
 }
 
 // private
@@ -92,6 +104,7 @@ Eb.prototype.identifyRequest = function(profile, options) {
   })
   .then(x => x.json())
   .then((response) => {
+    console.log('response', response);
     const newProfile = {
       ...response.profile,
       lastIdentify: new Date().getTime(),
@@ -106,6 +119,7 @@ Eb.prototype.identifyRequest = function(profile, options) {
       cookieDuration = response.cookie.expires || cookieDuration;
     }
     Cookies.setCookie('eb-profile', JSON.stringify(newProfile), cookieDuration);
+    console.log('new profile', newProfile);
     this.profile = newProfile;
     return response;
   })
@@ -119,7 +133,7 @@ Eb.prototype.getRecommendations = function(widgetId, options) {
   if (!this.profile) {
     return new Promise((r, j) => j('no profile'));
   }
-  return fetch(`${HTTP_PROTOCOL}${Config.API_URL}/widget/${widgetId}/recommendations/${this.profile.id}`)
+  return fetch(`${HTTP_PROTOCOL}${Config.API_URL}/widget/${widgetId}/recommendations/${this.profile.id}?nocache=true`)
 }
 
 module.exports = Eb;
