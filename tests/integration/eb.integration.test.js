@@ -23,6 +23,11 @@ describe('Earlybirds class', () => {
         lastIdentify: null
       })
     })
+    it('should implement a retrieveEbProfile that return the eb-profile cookie content', () => {
+      const eb = new Eb().getInstance()
+      expect(eb.retrieveEbProfile).toBeDefined()
+      expect(eb.retrieveEbProfile()).toEqual('fakeCookie')
+    })
     it('should have a profile property that store the eb-profile cookie', () => {
       const eb = new Eb().getInstance()
       expect(eb.profile).toBeDefined()
@@ -59,7 +64,10 @@ describe('Earlybirds class', () => {
       expect(eb.trackActivity).toBeDefined()
       expect(typeof eb.trackActivity).toEqual('function')
     })
-  })
-  describe('Identify', () => {
+    describe('Identify', () => {
+      it('should', () => {
+
+      })
+    })
   })
 })
