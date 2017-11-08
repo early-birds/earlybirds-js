@@ -1,45 +1,46 @@
 import {
-    ebProfileExist,
-    cookieIsValid,
-    profileHasChanged } from '../../src/modules/profileValidationCheck'
+  cookieDurationIsOutdated,
+  cookieHashAndProfileMatch,
+  shouldInitiateIdentifyRequest } from '../../src/modules/profileValidationCheck'
+import { Encode } from '../../src/utils/Utils'
 
 const defaultProfile = {
-    hash: null,
-    lastIdentify: null,
+  hash: null,
+  lastIdentify: null,
 }
 
 describe('profileValidationCheck', () => {
-    describe('ebProfileExist', () => {
+  describe('ebCookieMatchProfile', () => {
 
-        it('should be truthy when cookie and defaultProfile are the same', () => {
-            expect(ebProfileExist(defaultProfile, defaultProfile)).toBeTruthy()
-        })
-        it('should be falsy when cookie and defaultProfile are different', () => {
-            expect(ebProfileExist({}, defaultProfile)).toBeFalsy()
-        })
+    it('should be truthy if cookie hash and defaultProfile are the same', () => {
+      expect(cookieHashAndProfileMatch({ hash: Encode(defaultProfile) }, defaultProfile)).toBeTruthy()
     })
-
-    describe('cookieIsValid', () => {
-
-        it('should be falsy if cookie does not exist', () => {
-            expect(cookieIsValid(null)).toBeFalsy()
-        })
-        it('should be falsy if cookie.lastIdentify does not exist', () => {
-            expect(cookieIsValid({})).toBeFalsy()
-        })
-        it('should be falsy if lastIdentify > duration', () => {
-            Date.prototype.getTime = () => 5
-            const cookie = {
-                lastIdentify: 0
-            }
-            expect(cookieIsValid(cookie, 2)).toBeFalsy()
-        })
-        it('should be truthy if lastIdentify < duration', () => {
-            Date.prototype.getTime = () => 0
-            const cookie = {
-                lastIdentify: 0
-            }
-            expect(cookieIsValid(cookie, 2)).toBeTruthy()            
-        })
+    it('should be falsy if cookie hash and defaultProfile are different', () => {
+      expect(cookieHashAndProfileMatch({ hash: 'hash' }, defaultProfile)).toBeFalsy()
     })
+  })
+
+  describe('cookieDurationIsOutdated', () => {
+
+    it('should be truthy if cookie does not exist', () => {
+      expect(cookieDurationIsOutdated(null)).toBeTruthy()
+    })
+    it('should be truthy if cookie.lastIdentify does not exist', () => {
+      expect(cookieDurationIsOutdated({})).toBeTruthy()
+    })
+    it('should be truthy if lastIdentify > duration', () => {
+      Date.prototype.getTime = () => 5
+      const cookie = {
+        lastIdentify: 0
+      }
+      expect(cookieDurationIsOutdated(cookie, 2)).toBeTruthy()
+    })
+    it('should be falsy if lastIdentify < duration', () => {
+      Date.prototype.getTime = () => 0
+      const cookie = {
+        lastIdentify: 0
+      }
+      expect(cookieDurationIsOutdated(cookie, 2)).toBeFalsy()
+    })
+  })
 })

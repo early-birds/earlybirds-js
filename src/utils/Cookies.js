@@ -21,7 +21,6 @@ Cookies.getCookie = function(name) {
 Cookies.setCookie = function(name, value, days) {
   let expires = '';
   if (days !== null) {
-    console.log('days exist')
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     expires = `; expires=${date.toUTCString()}`;
