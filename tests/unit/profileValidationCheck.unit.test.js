@@ -1,6 +1,7 @@
 import {
   cookieDurationIsOutdated,
   cookieHashAndProfileMatch,
+  cookieDomainMatchGivenHost,
   shouldInitiateIdentifyRequest } from '../../src/modules/profileValidationCheck'
 import { Encode } from '../../src/utils/Utils'
 
@@ -16,7 +17,7 @@ describe('profileValidationCheck', () => {
       expect(cookieHashAndProfileMatch({ hash: Encode(defaultProfile) }, defaultProfile)).toBeTruthy()
     })
     it('should be falsy if cookie hash and defaultProfile are different', () => {
-      expect(cookieHashAndProfileMatch({ hash: 'hash' }, defaultProfile)).toBeFalsy()
+      expect(cookieHashAndProfileMatch(defaultProfile, { hash: 'hash' })).toBeFalsy()
     })
   })
 
@@ -41,6 +42,31 @@ describe('profileValidationCheck', () => {
         lastIdentify: 0
       }
       expect(cookieDurationIsOutdated(cookie, 2)).toBeFalsy()
+    })
+  })
+
+  describe('cookieDomainMatchGivenHost', () => {
+    it('should be falsy if cookie is null', () => {
+      expect(cookieDomainMatchGivenHost(null, '')).toBeFalsy()
+    })
+    it('should be falsy if host is null', () => {
+      expect(cookieDomainMatchGivenHost('', null)).toBeFalsy()
+    })
+    it('should be truthy if cookie match host', () => {
+      const cookie = {
+        domain: 'fakeDomain'
+      }
+      const fakeHost = 'fakeDomain'
+      const res = cookieDomainMatchGivenHost(cookie, fakeHost)
+      expect(res).toBeTruthy()
+    })
+    it('should be falsy if cookie does not match host', () => {
+      const cookie = {
+        domain: 'foobarfoo'
+      }
+      const fakeHost = 'fakeDomain'
+      const res = cookieDomainMatchGivenHost(cookie, fakeHost)
+      expect(res).toBeFalsy()
     })
   })
 })

@@ -5,7 +5,7 @@ const makeSingleton = obj => {
     getInstance(params) {
       return instance || (instance = new obj(params), instance)
     }
-    reset(params) {
+    reset() {
       instance = null
     }
   }
