@@ -1,5 +1,3 @@
-import Eb from './src/Eb'
+import Eb from './src/eb'
 
-export {
-  Eb
-}
+export default Eb
