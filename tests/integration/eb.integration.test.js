@@ -38,10 +38,19 @@ beforeEach(() => {
   Cookies.getCookie = jest.fn()
 })
 
-afterAll(() => {
+afterEach(() => {
   Date.prototype.getTime.mockRestore()
+
+  // reset spies and function implementation
+  fetch.mockReset()
+  fetch.mockRestore()
   Cookies.setCookie.mockRestore()
+  Cookies.setCookie.mockReset()
   Cookies.getCookie.mockRestore()
+  Cookies.getCookie.mockReset()
+})
+
+afterAll(() => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = jasmineDefaultTimeoutInterval
 })
 
@@ -165,12 +174,16 @@ describe('Earlybirds class', () => {
       expect(eb.identify()).toEqual(null);
     })
 
-    it('should return the current profile if identify is not needed', () => {
+    it('should return a promise that resolves to the current profile if identify is not needed', () => {
       expect.assertions(2)
 
       const eb = new Eb().getInstance('fakeTrackerKey')
       eb.profile = { lastIdentify: 0 }
-      expect(eb.identify(DEFAULT_PROFILE)).toEqual(DEFAULT_PROFILE);
+      eb
+        .identify(DEFAULT_PROFILE)
+        .then((res) => {
+          expect(res).toEqual(DEFAULT_PROFILE);
+        })
       expect(fetch).not.toBeCalled()
     })
 
@@ -226,7 +239,8 @@ describe('Earlybirds class', () => {
           .identify(FAKE_PROFILE)
           .then(response => {
             // set eb profile cookie
-            expect(Cookies.setCookie).toBeCalledWith('eb-profile', fakeCookieExpected, eb.defaultCookieConfig)
+            expect(Cookies.setCookie)
+              .toBeCalledWith('eb-profile', fakeCookieExpected, eb.defaultCookieConfig)
             // update eb profile
             expect(eb.profile).toEqual(expectedResult)
             done()
@@ -262,7 +276,8 @@ describe('Earlybirds class', () => {
         eb
           .identify(FAKE_PROFILE)
           .then(response => {
-            expect(Cookies.setCookie).toBeCalledWith('eb-profile', fakeCookieExpected, fakeResponse.cookie)
+            expect(Cookies.setCookie)
+              .toBeCalledWith('eb-profile', fakeCookieExpected, fakeResponse.cookie)
             done()
             return response;
           })
@@ -270,6 +285,83 @@ describe('Earlybirds class', () => {
             console.log(err)
           })
       })
+    })
+  })
+
+  describe('Track Activity', () => {
+
+    it('should return false if not activities is provided', () => {
+      expect.assertions(1)
+      const eb = new Eb().getInstance()
+      expect(eb.trackActivity()).toEqual(false);
+    })
+
+    it('should return false if originalId is missing in activity object', () => {
+      expect.assertions(1)
+      const eb = new Eb().getInstance()
+      const fakeInputs = [
+        {
+          profile: 'FAKE_PROFILE',
+          verb: 'FAKE_VERB'
+        }
+      ]
+      expect(eb.trackActivity(fakeInputs)).toEqual(false);
+    })
+
+    it('should make a http request if inputs are ok (happy path)', () => {
+      expect.assertions(1)
+      const eb = new Eb().getInstance()
+      const fakeInputs = [
+        {
+          profile: 'FAKE_PROFILE',
+          originalId: 'FAKE_ID',
+          verb: 'FAKE_VERB'
+        }
+      ]
+      eb.trackActivity(fakeInputs)
+      expect(fetch).toBeCalled()
+    })
+
+    it('should not make an http request if eb-lastactivity-hash cookie is not new', () => {
+     // expect.assertions(1)
+      const fakeInputs = [
+        {
+          profile: 'FAKE_PROFILE',
+          originalId: 'FAKE_ID',
+          verb: 'FAKE_VERB'
+        }
+      ]
+      const fakeHash = Encode(JSON.stringify(fakeInputs))
+      Cookies.getCookie = jest.fn(() => fakeHash)
+
+      const eb = new Eb().getInstance()
+      eb.trackActivity(fakeInputs)
+      expect(fetch).not.toBeCalled()
+    })
+
+    it('should catch errors', () => {
+      const fakeInputs = [
+        {
+          profile: 'FAKE_PROFILE',
+          originalId: 'FAKE_ID',
+          verb: 'FAKE_VERB'
+        }
+      ]
+      fetch = jest.fn(() => {
+        return new Promise((resolve, reject) => reject('FAKE_ERROR'))
+      })
+      const eb = new Eb().getInstance()
+      const res = eb.trackActivity(fakeInputs)
+      console.log(res)
+      res.catch(err => {
+        console.log('catch err')
+        console.log(err)
+      })
+      /*
+        .catch(err => {
+          expect(err).toBe('FAKE_ERROR')
+        })
+        */
     })
   })
 })

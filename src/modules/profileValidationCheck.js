@@ -17,15 +17,15 @@ export const cookieDomainMatchGivenHost = (cookie, host) => {
   return (cookie && cookie.domain && host.indexOf(cookie.domain) >= 0)
 }
 
-export const shouldInitiateIdentifyRequest = (newProfile, currentProfile, duration) => {
-  if (!newProfile) return true;
-  if (!currentProfile) {
-    return true
-  }
-  if (!cookieHashAndProfileMatch(newProfile, currentProfile)) {
-    return true
-  }
-  if (duration && cookieDurationIsOutdated(currentProfile, duration)) {
+export const shouldInitiateIdentifyRequest =
+  (newProfile, currentProfile, duration) => {
+
+  if (
+    !newProfile ||
+    !currentProfile ||
+    !cookieHashAndProfileMatch(newProfile, currentProfile) ||
+    (duration && cookieDurationIsOutdated(currentProfile, duration))
+  ) {
     return true
   }
   return false
