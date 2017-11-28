@@ -1,5 +1,6 @@
 import Eb from '../../src/eb'
 import Cookies from '../../src/utils/Cookies'
+import Config from '../../config'
 import { Encode } from '../../src/utils/Utils'
 import {
   shouldInitiateIdentifyRequest } from '../../src/modules/profileValidationCheck'
@@ -7,6 +8,9 @@ import {
 const jasmineDefaultTimeoutInterval = jasmine.DEFAULT_TIMEOUT_INTERVAL
 
 beforeEach(() => {
+
+  // mute console.log when tests are running.
+  console.log = () => {}
 
   // avoid using the same instance of Eb for each test
   new Eb().reset()
@@ -19,10 +23,15 @@ beforeEach(() => {
     hash: 'fakeHash',
     lastIdentify: 10
   }
+
   global.DEFAULT_PROFILE = {
     hash: null,
     lastIdentify: null,
   }
+
+  // mock http protocol
+  Config.HTTP_PROTOCOL = 'fakeHttpProtocol/'
+  Config.API_URL = 'fakeApiUrl'
 
   // fetch should resolve to an empty string by default.
   // mock response can be overriden in the test
@@ -82,7 +91,7 @@ describe('Earlybirds class', () => {
 
     describe('retrieveEbProfile', () => {
 
-      it('should implement a retrieveEbProfile', () => {
+      it('should implement a retrieveEbProfile method', () => {
         expect.assertions(1)
 
         const eb = new Eb().getInstance()
@@ -308,9 +317,9 @@ describe('Earlybirds class', () => {
       expect(eb.trackActivity(fakeInputs)).toEqual(false);
     })
 
-    it('should make a http request if inputs are ok (happy path)', () => {
-      expect.assertions(1)
-      const eb = new Eb().getInstance()
+    it('should make a http request if inputs are ok then set the eb-lastactivity-hash cookie (happy path)', done => {
+      expect.assertions(2)
+      const eb = new Eb().getInstance('fakeTrackerKey')
       const fakeInputs = [
         {
           profile: 'FAKE_PROFILE',
@@ -318,12 +327,27 @@ describe('Earlybirds class', () => {
           verb: 'FAKE_VERB'
         }
       ]
-      eb.trackActivity(fakeInputs)
-      expect(fetch).toBeCalled()
+      const hash = Encode(JSON.stringify(fakeInputs))
+      eb
+        .trackActivity(fakeInputs)
+        .then(() => {
+          expect(Cookies.setCookie).toBeCalledWith('eb-lastactivity-hash', hash)
+          done()
+        })
+      const url = `${Config.HTTP_PROTOCOL}${Config.API_URL}/tracker/fakeTrackerKey/activity`
+      expect(fetch).toBeCalledWith(
+        url,
+        {
+          method: 'post',
+          body: JSON.stringify({
+            activity: fakeInputs
+          })
+        }
+      )
     })
 
     it('should not make an http request if eb-lastactivity-hash cookie is not new', () => {
-     // expect.assertions(1)
+      expect.assertions(1)
       const fakeInputs = [
         {
           profile: 'FAKE_PROFILE',
@@ -339,7 +363,37 @@ describe('Earlybirds class', () => {
       expect(fetch).not.toBeCalled()
     })
 
+    it('should return an object with activities property', done => {
+      expect.assertions(1)
+      const fakeResponse = {}
+      fakeResponse.json = () => (
+        new Promise(r =>
+          r({
+            activities: [],
+          })
+        )
+      )
+      const fakeInputs = [
+        {
+          profile: 'FAKE_PROFILE',
+          originalId: 'FAKE_ID',
+          verb: 'FAKE_VERB'
+        }
+      ]
+      fetch = jest.fn(() => (
+        new Promise(r => r(fakeResponse))
+      ))
+      const eb = new Eb().getInstance()
+      eb
+        .trackActivity(fakeInputs)
+        .then(response => {
+          expect(response.activities).toBeDefined()
+          done()
+        })
+    })
+
     it('should catch errors', () => {
+      expect.assertions(1)
       const fakeInputs = [
         {
           profile: 'FAKE_PROFILE',
@@ -351,17 +405,72 @@ describe('Earlybirds class', () => {
         return new Promise((resolve, reject) => reject('FAKE_ERROR'))
       })
       const eb = new Eb().getInstance()
-      const res = eb.trackActivity(fakeInputs)
-      console.log(res)
-      res.catch(err => {
-        console.log('catch err')
-        console.log(err)
-      })
-      /*
+      eb
+        .trackActivity(fakeInputs)
         .catch(err => {
           expect(err).toBe('FAKE_ERROR')
         })
-        */
+    })
+  })
+
+  describe('Recommendations', () => {
+    it('should return a promise that reject with the\
+    value "Earlybirds error: Not identified" if not identified yet', () => {
+      const eb = new Eb().getInstance()
+      eb
+        .getRecommendations('fakeWidgetId')
+        .catch(err => {
+          expect(err).toBe('Earlybirds error: Not identified')
+        })
+    })
+    it('should be falsy if no widgetId is provided', () => {
+      const eb = new Eb().getInstance()
+      const res = eb.getRecommendations()
+      expect(res).toBe(false)
+    })
+    it('should make a http call (happy path)', () => {
+      const eb = new Eb().getInstance('fakeTrackerKey')
+      eb.profile = {}
+      const res = eb.getRecommendations('fakeWidgetId')
+      expect(fetch).toBeCalled()
+    })
+    it('should return an object with recommendations and widget', done => {
+      expect.assertions(2)
+      const fakeResponse = {}
+      fakeResponse.json = () => (
+        new Promise(r =>
+          r({
+            recommendations: {},
+            widget: {}
+          })
+        )
+      )
+      fetch = jest.fn(() => (
+        new Promise(r => r(fakeResponse))
+      ))
+      const eb = new Eb().getInstance()
+      eb.profile = {}
+      eb
+        .getRecommendations('fakeWidgetId')
+        .then(response => {
+          expect(response.recommendations).toBeDefined()
+          expect(response.widget).toBeDefined()
+          done()
+        })
+    })
+    it('should catch errors', () => {
+      expect.assertions(1)
+      fetch = jest.fn(() => {
+        return new Promise((resolve, reject) => reject('FAKE_ERROR_RECOS'))
+      })
+      const eb = new Eb().getInstance()
+      eb.profile = {}
+      eb
+        .getRecommendations('fakeWidgetId')
+        .catch(err => {
+          expect(err).toBe('FAKE_ERROR_RECOS')
+        })
     })
   })
 })
+

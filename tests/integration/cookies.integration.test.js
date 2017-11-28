@@ -9,7 +9,8 @@ describe('Cookies', () => {
   })
   it('should store a cookie and retrieve it by its name', () => {
     Cookies.setCookie('foo', 'bar')
-    expect(Cookies.getCookie('foo')).toEqual('bar')
+    const res = Cookies.getCookie('foo')
+    expect(res).toEqual('bar')
   })
   it('should take into account the cookie duration', () => {
 

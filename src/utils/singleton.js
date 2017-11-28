@@ -3,7 +3,9 @@ const makeSingleton = obj => {
   let instance = null
   return class {
     getInstance(params) {
-      return instance || (instance = new obj(params), instance)
+      if (!instance)
+        instance = new obj(params)
+      return instance
     }
     reset() {
       instance = null

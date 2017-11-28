@@ -8,9 +8,6 @@ import {
 
 import { checkActivitiesInputs } from './modules/trackActivityCheck'
 
-const HTTP_PROTOCOL =
-  (document.location.protocol == 'https:' ? 'https://' : 'http://');
-
 class Eb {
   constructor(trackerKey) {
     this.defaultProfile = {
@@ -59,17 +56,15 @@ class Eb {
           this.profile = profile
           return response;
         })
-        .catch(console.log)
     }
     return new Promise(r => r(this.defaultProfile));
   }
 
   identifyRequest(profile) {
     const url = `\
-${HTTP_PROTOCOL}\
+${Config.HTTP_PROTOCOL}\
 ${Config.API_URL}\
 /tracker/${this.trackerKey}/identify`;
-    console.log(url)
     return fetch(url, {
       method: 'POST',
       headers: {
@@ -82,19 +77,19 @@ ${Config.API_URL}\
   }
 
   getRecommendations(widgetId) {
+    if (!widgetId) return false
     if (!this.profile) {
-      return new Promise((r, j) => j('no profile'));
+      return new Promise((r, j) => j('Earlybirds error: Not identified'));
     }
     const url = `\
-${HTTP_PROTOCOL}\
+${Config.HTTP_PROTOCOL}\
 ${Config.API_URL}\
 /widget/${widgetId}\
 /recommendations/${this.profile.id}`
     return fetch(url)
     .then(x => x.json())
     .catch(err => {
-      console.log(err)
-      return err
+      throw err
     })
   }
 
@@ -102,23 +97,20 @@ ${Config.API_URL}\
 
     const checkActivityInputsErr = checkActivitiesInputs(activities)
     if (checkActivityInputsErr !== true) {
-      console.log(checkActivityInputsErr)
       return false
     }
 
     const hash = Encode(JSON.stringify(activities))
-    console.log(hash)
     if (hash === Cookies.getCookie('eb-lastactivity-hash')) {
-      console.log('this activity has already been tracked')
+      console.log('Earlybirds : can\'t track the same activity twice')
       return false
     }
 
-    const url = `
-${HTTP_PROTOCOL}\
+    const url = `\
+${Config.HTTP_PROTOCOL}\
 ${Config.API_URL}\
 /tracker/${this.trackerKey}\
 /activity`
-    console.log(url)
     return fetch(url, {
       method: 'post',
       body: JSON.stringify({
@@ -127,13 +119,12 @@ ${Config.API_URL}\
     })
     .then(x => x.json())
     .then(response => {
-      console.log(response)
       Cookies.setCookie('eb-lastactivity-hash', hash)
+      return response
     })
     .catch(err => {
-      console.log(' catch here')
-      console.log(err)
-      return err
+      console.log('Earlybirds error : trackActivity', err)
+      throw err
     })
   }
 }

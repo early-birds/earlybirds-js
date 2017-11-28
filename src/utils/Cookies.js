@@ -10,13 +10,11 @@ Cookies.retrieveCookie = function(name) {
 }
 Cookies.getCookie = function(name) {
   const retrievedCookie = this.retrieveCookie(name)
-  let data = null;
   try {
-    data = JSON.parse(retrievedCookie);
+    return JSON.parse(retrievedCookie);
   } catch (e) {
     return retrievedCookie || null;
   }
-  return data;
 }
 Cookies.setCookie = function(name, value, days) {
   let expires = '';
