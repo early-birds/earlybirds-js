@@ -1,23 +1,25 @@
+import { Encode } from '../../utils/Utils'
 import {
+  shouldInitiateIdentifyRequest,
   cookieDurationIsOutdated,
   cookieHashAndProfileMatch,
-  cookieDomainMatchGivenHost,
-  shouldInitiateIdentifyRequest } from '../../src/modules/profileValidationCheck'
-import { Encode } from '../../src/utils/Utils'
+  cookieDomainMatchGivenHost } from '../../checks/profileValidationCheck'
 
-const defaultProfile = {
-  hash: null,
-  lastIdentify: null,
-}
+beforeEach(() => {
+  global.DEFAULT_PROFILE = {
+    hash: null,
+    lastIdentify: null,
+  }
+})
 
 describe('profileValidationCheck', () => {
   describe('ebCookieMatchProfile', () => {
 
     it('should be truthy if cookie hash and defaultProfile are the same', () => {
-      expect(cookieHashAndProfileMatch({ hash: Encode(defaultProfile) }, defaultProfile)).toBeTruthy()
+      expect(cookieHashAndProfileMatch({ hash: Encode(DEFAULT_PROFILE) }, DEFAULT_PROFILE)).toBeTruthy()
     })
     it('should be falsy if cookie hash and defaultProfile are different', () => {
-      expect(cookieHashAndProfileMatch(defaultProfile, { hash: 'hash' })).toBeFalsy()
+      expect(cookieHashAndProfileMatch(DEFAULT_PROFILE, { hash: 'hash' })).toBeFalsy()
     })
   })
 
@@ -68,5 +70,48 @@ describe('profileValidationCheck', () => {
       const res = cookieDomainMatchGivenHost(cookie, fakeHost)
       expect(res).toBeFalsy()
     })
+  })
+})
+
+describe('shouldInitiateIdentifyRequest', () => {
+  it('should implement a "shouldInitiateIdentifyRequest" that checks if a new identify is required', () => {
+    expect.assertions(1)
+    expect(shouldInitiateIdentifyRequest).toBeDefined()
+  })
+
+  it('should be truthy if eb profile cookie does not exist', () => {
+    expect.assertions(1)
+    let cookie = undefined
+    const res = shouldInitiateIdentifyRequest(cookie, DEFAULT_PROFILE)
+    expect(res).toBeTruthy()
+  })
+  it('should be truthy if cookie is outdated', () => {
+    expect.assertions(1)
+    const fakeCookie = {
+      hash: null,
+      lastIdentify: 0,
+    }
+    const fakeDuration = 1
+    const res = shouldInitiateIdentifyRequest(fakeCookie, DEFAULT_PROFILE, fakeDuration)
+    expect(res).toBeTruthy()
+  })
+  it('should be truthy if cookie hash and profile does not match', () => {
+    expect.assertions(1)
+    const fakeProfile = {
+      hash: 'fakeHash',
+      lastIdentify: 50,
+    }
+    const res = shouldInitiateIdentifyRequest(DEFAULT_PROFILE, fakeProfile)
+    expect(res).toBeTruthy()
+  })
+  it('should be falsy if cookie hash and profile matches', () => {
+    expect.assertions(1)
+    const encodedDefaultProfile = Encode(DEFAULT_PROFILE)
+    const fakeCookie = {
+      hash: encodedDefaultProfile,
+      lastIdentify: 5,
+    }
+    const res = shouldInitiateIdentifyRequest(fakeCookie, DEFAULT_PROFILE)
+    expect(res).toBeFalsy()
   })
 })

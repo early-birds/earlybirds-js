@@ -1,4 +1,4 @@
-import Cookies from '../../src/utils/Cookies'
+import Cookies from '../Cookies'
 
 describe('Cookies', () => {
   it('should implement getCookie', () => {

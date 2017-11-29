@@ -1,4 +1,4 @@
-import { detectEmptyOriginalId } from '../../src/modules/trackActivityCheck'
+import { detectEmptyOriginalId } from '../trackActivityCheck'
 
 describe('Activities checking', () => {
 

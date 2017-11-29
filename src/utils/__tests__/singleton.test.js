@@ -1,4 +1,4 @@
-import makeSingleton from '../../src/utils/singleton'
+import makeSingleton from '../singleton'
 
 describe('makeSingleton', () => {
   it('should return null if obj params is undefined', () => {

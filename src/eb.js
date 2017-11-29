@@ -4,9 +4,9 @@ import Config from '../config'
 import { Encode } from './utils/Utils'
 import {
   cookieDomainMatchGivenHost,
-  shouldInitiateIdentifyRequest } from './modules/profileValidationCheck'
+  shouldInitiateIdentifyRequest } from './checks/profileValidationCheck'
 
-import { checkActivitiesInputs } from './modules/trackActivityCheck'
+import { checkActivitiesInputs } from './checks/trackActivityCheck'
 
 class Eb {
   constructor(trackerKey) {
