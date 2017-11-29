@@ -36,8 +36,10 @@ class Eb {
     if (newProfile === undefined) return null;
     if (!this.trackerKey) return null;
     if (shouldInitiateIdentifyRequest(newProfile, this.profile)) {
+      console.log('start identify')
       return this.identifyRequest(newProfile)
         .then(response => {
+          console.log('ok')
           const profile = {
             ...response.profile,
             lastIdentify: new Date().getTime(),
