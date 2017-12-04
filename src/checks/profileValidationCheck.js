@@ -19,7 +19,6 @@ export const cookieDomainMatchGivenHost = (cookie, host) => {
 
 export const shouldInitiateIdentifyRequest =
   (newProfile, currentProfile, duration) => {
-
   if (
     !newProfile ||
     !currentProfile ||

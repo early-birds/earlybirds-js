@@ -30,10 +30,9 @@ class Eb {
     this.trackerKey = trackerKey
   }
 
-  identify(newProfile, options = {
+  identify(newProfile = {}, options = {
     cookieDuration: 90
   }) {
-    if (newProfile === undefined) return null;
     if (!this.trackerKey) return null;
     if (shouldInitiateIdentifyRequest(newProfile, this.profile)) {
       console.log('start identify')
@@ -59,7 +58,7 @@ class Eb {
           return response;
         })
     }
-    return new Promise(r => r(this.defaultProfile));
+    return new Promise(r => r(this.profile));
   }
 
   identifyRequest(profile) {
@@ -78,8 +77,8 @@ ${Config.API_URL}\
     .then(x => x.json())
   }
 
-  getRecommendations(widgetId) {
-    if (!widgetId) return false
+  getRecommendations(widgetId, { rescorerParams = {} } = {}) {
+    if (!widgetId) return Promise.reject();
     if (!this.profile) {
       return new Promise((r, j) => j('Earlybirds error: Not identified'));
     }
@@ -88,9 +87,10 @@ ${Config.HTTP_PROTOCOL}\
 ${Config.API_URL}\
 /widget/${widgetId}\
 /recommendations/${this.profile.id}`
-    return fetch(url)
+    return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}`)
     .then(x => x.json())
     .catch(err => {
+      console.error(err);
       throw err
     })
   }
