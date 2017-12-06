@@ -30,7 +30,7 @@ class Eb {
     this.trackerKey = trackerKey
   }
 
-  identify(newProfile = {}, options = {
+  identify(newProfile = { profile: {} }, options = {
     cookieDuration: 90
   }) {
     if (!this.trackerKey) return null;
@@ -39,6 +39,7 @@ class Eb {
       return this.identifyRequest(newProfile)
         .then(response => {
           console.log('ok')
+          console.log(response)
           const profile = {
             ...response.profile,
             lastIdentify: new Date().getTime(),
@@ -116,7 +117,7 @@ ${Config.API_URL}\
     return fetch(url, {
       method: 'post',
       body: JSON.stringify({
-        activity: activities
+        activity: activities.map(x => ({...x, profile: this.profile.id}))
       })
     })
     .then(x => x.json())
