@@ -96,7 +96,11 @@ ${Config.API_URL}\
     })
   }
 
-  trackActivity(activities) {
+  trackActivity(activities = []) {
+    if (!Array.isArray(activities)) {
+      console.warn('Track activity: expect an array')
+      return false
+    }
 
     const checkActivityInputsErr = checkActivitiesInputs(activities)
     if (checkActivityInputsErr !== true) {
