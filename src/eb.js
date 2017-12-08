@@ -4,7 +4,8 @@ import Config from '../config'
 import { Encode } from './utils/Utils'
 import {
   cookieDomainMatchGivenHost,
-  shouldInitiateIdentifyRequest } from './checks/profileValidationCheck'
+  shouldInitiateIdentifyRequest
+} from './checks/profileValidationCheck'
 
 import { checkActivitiesInputs } from './checks/trackActivityCheck'
 
@@ -47,7 +48,7 @@ class Eb {
           }
           const cookieConfig =
             cookieDomainMatchGivenHost(response.cookie, this.hostname) ?
-            response.cookie : this.defaultCookieConfig
+              response.cookie : this.defaultCookieConfig
 
           Cookies.setCookie(
             'eb-profile',
@@ -75,11 +76,11 @@ ${Config.API_URL}\
       },
       body: JSON.stringify(profile)
     })
-    .then(x => x.json())
+      .then(x => x.json());
   }
 
-  getRecommendations(widgetId, { rescorerParams = {} } = {}) {
-    if (!widgetId) return Promise.reject();
+  getRecommendations(widgetId, { rescorerParams = {}, variables = {} } = {}) {
+    if (!widgetId) return Promise.reject(new Error('WidgetId is mandatory'));
     if (!this.profile) {
       return new Promise((r, j) => j('Earlybirds error: Not identified'));
     }
@@ -88,51 +89,60 @@ ${Config.HTTP_PROTOCOL}\
 ${Config.API_URL}\
 /widget/${widgetId}\
 /recommendations/${this.profile.id}`
-    return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}`)
-    .then(x => x.json())
-    .catch(err => {
-      console.error(err);
-      throw err
-    })
+    return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
+      .then(x => x.json())
+      .catch(err => {
+        console.error(err);
+        throw err;
+      });
   }
 
   trackActivity(activities = []) {
     if (!Array.isArray(activities)) {
-      console.warn('Track activity: expect an array')
-      return false
+      activities = [activities];
     }
 
     const checkActivityInputsErr = checkActivitiesInputs(activities)
     if (checkActivityInputsErr !== true) {
-      return false
+      return Promise.reject(new Error(checkActivityInputsErr));
     }
 
     const hash = Encode(JSON.stringify(activities))
     if (hash === Cookies.getCookie('eb-lastactivity-hash')) {
-      console.log('Earlybirds : can\'t track the same activity twice')
-      return false
+      return Promise.resolve();
     }
 
-    const url = `\
-${Config.HTTP_PROTOCOL}\
-${Config.API_URL}\
-/tracker/${this.trackerKey}\
-/activity`
+    const url = `${Config.HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/activity`;
+
     return fetch(url, {
       method: 'post',
       body: JSON.stringify({
-        activity: activities.map(x => ({...x, profile: this.profile.id}))
+        activity: activities.map(x => ({ ...x, profile: this.profile.id }))
+      }),
+    })
+      .then(x => x.json())
+      .then((response) => {
+        if (response.statusCode >= 300 || response.statusCode < 200) {
+          throw new Error(response);
+        }
+        Cookies.setCookie('eb-lastactivity-hash', hash);
+        return response;
       })
-    })
-    .then(x => x.json())
-    .then(response => {
-      Cookies.setCookie('eb-lastactivity-hash', hash)
-      return response
-    })
-    .catch(err => {
-      console.log('Earlybirds error : trackActivity', err)
-      throw err
-    })
+      .catch((err) => {
+        console.log('Earlybirds error : trackActivity', err)
+        throw err;
+      });
+  }
+
+  trackClickOnReco({ _id: { original_id }, id, url }) {
+    this.trackActivity({
+      verb: 'click-on-reco',
+      originalId: id || original_id,
+    }).then(() => document.location.href = url)
+      .catch((err) => {
+        console.error(err);
+        document.location.href = url;
+      });
   }
 }
 
