@@ -9,8 +9,12 @@ export const cookieDurationIsOutdated = (cookie, duration) => {
 
 // the given cookie hash is different from the given profile
 export const cookieHashAndProfileMatch  =
-  (profile, cookie) =>
-    isEqual(Encode(profile), cookie.hash)
+  (profile, cookie) => {
+    if (profile && cookie && cookie.hash) {
+      return Encode(profile) == cookie.hash
+    }
+    return false
+  }
 
 export const cookieDomainMatchGivenHost = (cookie, host) => {
   if (!cookie || !host) return false;

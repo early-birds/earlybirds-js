@@ -16,10 +16,21 @@ describe('profileValidationCheck', () => {
   describe('ebCookieMatchProfile', () => {
 
     it('should be truthy if cookie hash and defaultProfile are the same', () => {
-      expect(cookieHashAndProfileMatch({ hash: Encode(DEFAULT_PROFILE) }, DEFAULT_PROFILE)).toBeTruthy()
+      expect(
+        cookieHashAndProfileMatch(
+          DEFAULT_PROFILE,
+          { hash: Encode(DEFAULT_PROFILE) }
+        )
+      ).toBeTruthy()
     })
     it('should be falsy if cookie hash and defaultProfile are different', () => {
       expect(cookieHashAndProfileMatch(DEFAULT_PROFILE, { hash: 'hash' })).toBeFalsy()
+    })
+    it('should be falsy if hash is en empty object', () => {
+      expect(cookieHashAndProfileMatch(DEFAULT_PROFILE, {})).toBeFalsy()
+    })
+    it('should be falsy if profile and cookie are different', () => {
+      expect(cookieHashAndProfileMatch(-1711573533, {})).toBeFalsy()
     })
   })
 
