@@ -21,15 +21,18 @@ describe('Identify', () => {
     expect(eb.identify()).toEqual(null);
   })
 
-  it('should return a promise that resolves to the current profile if identify is not needed', () => {
+  it('should return a promise that resolves to the current profile if identify is not needed', done => {
     expect.assertions(2)
 
+    const encoded = Encode(Mock.DEFAULT_PROFILE)
+    const fakeCurrentProfile = { hash: encoded, lastIdentify: 0 }
     const eb = new Eb().getInstance('fakeTrackerKey')
-    eb.profile = { lastIdentify: 0 }
+    eb.profile = fakeCurrentProfile
     eb
       .identify(Mock.DEFAULT_PROFILE)
       .then(res => {
-        expect(res).toEqual(Mock.DEFAULT_PROFILE);
+        expect(res).toEqual(fakeCurrentProfile);
+        done()
       })
     expect(fetch).not.toBeCalled()
   })

@@ -122,7 +122,7 @@ describe('shouldInitiateIdentifyRequest', () => {
       hash: encodedDefaultProfile,
       lastIdentify: 5,
     }
-    const res = shouldInitiateIdentifyRequest(fakeCookie, DEFAULT_PROFILE)
+    const res = shouldInitiateIdentifyRequest(DEFAULT_PROFILE, fakeCookie)
     expect(res).toBeFalsy()
   })
 })

@@ -36,11 +36,8 @@ class Eb {
   }) {
     if (!this.trackerKey) return null;
     if (shouldInitiateIdentifyRequest(newProfile, this.profile)) {
-      console.log('start identify')
       return this.identifyRequest(newProfile)
         .then(response => {
-          console.log('ok')
-          console.log(response)
           const profile = {
             ...response.profile,
             lastIdentify: new Date().getTime(),
@@ -58,6 +55,9 @@ class Eb {
 
           this.profile = profile
           return response;
+        })
+        .catch(err => {
+          throw err;
         })
     }
     return new Promise(r => r(this.profile));
@@ -92,12 +92,16 @@ ${Config.API_URL}\
     return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
       .then(x => x.json())
       .catch(err => {
-        console.error(err);
         throw err;
       });
   }
 
-  trackActivity(activities = []) {
+  trackActivity(activities) {
+
+    if (!activities) {
+      return Promise.reject(new Error('no activities provided'))
+    }
+
     if (!Array.isArray(activities)) {
       activities = [activities];
     }

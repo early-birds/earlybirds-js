@@ -22,10 +22,15 @@ describe('Recommendations', () => {
           expect(err).toBe('Earlybirds error: Not identified')
         })
     })
-  it('should be falsy if no widgetId is provided', () => {
+  it('should return a promise that reject to "WidgetId is mandatory" if no widgetId is provided', done => {
+    expect.assertions(1)
     const eb = new Eb().getInstance()
-    const res = eb.getRecommendations()
-    expect(res).toBe(false)
+    eb
+      .getRecommendations()
+      .catch(err => {
+        expect(err.message).toBe('WidgetId is mandatory')
+        done()
+      })
   })
   it('should make a http call (happy path)', () => {
     const eb = new Eb().getInstance('fakeTrackerKey')

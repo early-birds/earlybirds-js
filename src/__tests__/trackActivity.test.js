@@ -15,13 +15,19 @@ afterEach(() => {
 
 describe('Track Activity', () => {
 
-  it('should return false if not activities is provided', () => {
+  it('should return a promise that reject to "no activities provided" if not activities is provided', done => {
     expect.assertions(1)
     const eb = new Eb().getInstance()
-    expect(eb.trackActivity()).toEqual(false);
+    eb
+      .trackActivity()
+      .catch(err => {
+        expect(err.message).toBe('no activities provided')
+        done()
+      })
+
   })
 
-  it('should return false if originalId is missing in activity object', () => {
+  it('should return a promise that reject to "empty field originalId in one activity" if originalId is missing in activity object', done => {
     expect.assertions(1)
     const eb = new Eb().getInstance()
     const fakeInputs = [
@@ -30,15 +36,21 @@ describe('Track Activity', () => {
         verb: 'FAKE_VERB'
       }
     ]
-    expect(eb.trackActivity(fakeInputs)).toEqual(false);
+    eb
+      .trackActivity(fakeInputs)
+      .catch(err => {
+        expect(err.message).toBe('empty field originalId in one activity')
+        done()
+      })
   })
 
   it('should make a http request if inputs are ok then set the eb-lastactivity-hash cookie (happy path)', done => {
     expect.assertions(2)
     const eb = new Eb().getInstance('fakeTrackerKey')
+    eb.profile = { id: 'FAKE_ID' }
     const fakeInputs = [
       {
-        profile: 'FAKE_PROFILE',
+        profile: 'FAKE_ID',
         originalId: 'FAKE_ID',
         verb: 'FAKE_VERB'
       }
@@ -100,6 +112,7 @@ describe('Track Activity', () => {
       new Promise(r => r(fakeResponse))
     ))
     const eb = new Eb().getInstance()
+    eb.profile = { id: 'FAKE_ID' }
     eb
       .trackActivity(fakeInputs)
       .then(response => {
@@ -121,6 +134,7 @@ describe('Track Activity', () => {
       return new Promise((resolve, reject) => reject('FAKE_ERROR'))
     })
     const eb = new Eb().getInstance()
+    eb.profile = { id: 'FAKE_ID' }
     eb
       .trackActivity(fakeInputs)
       .catch(err => {
