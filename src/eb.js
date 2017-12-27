@@ -96,6 +96,24 @@ ${Config.API_URL}\
       });
   }
 
+  getRecosForCluster(widgetId, clusterId, { rescorerParams = {}, variables = {} } = {}) {
+    if (!widgetId) return Promise.reject(new Error('WidgetId is mandatory'));
+    if (!clusterId) return Promise.reject(new Error('Earlybirds error: ClusterId not provided'));
+    if (!this.profile) {
+      return new Promise((r, j) => j('Earlybirds error: Not identified'));
+    }
+    const url = `\
+${Config.HTTP_PROTOCOL}\
+${Config.API_URL}\
+/widget/${widgetId}\
+/recommendations/cluster/${clusterId}`
+    return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
+      .then(x => x.json())
+      .catch(err => {
+        throw err;
+      });
+  }
+
   trackActivity(activities) {
 
     if (!activities) {
@@ -183,7 +201,7 @@ ${this.profile.id}/${verb}`;
       .then(x => x.json())
       .catch(err => {
         console.log('Earlybirds js : ', err.message)
-        return err
+        throw err
       })
 
     console.log(url)
