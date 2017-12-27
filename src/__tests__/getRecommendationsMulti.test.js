@@ -11,7 +11,7 @@ afterEach(() => {
   Mock.restore()
 })
 
-describe('Get Recos Cluster', () => {
+describe('Get multi recos', () => {
 
   it('should return a promise that reject with the\
     value "Earlybirds error: Not identified" \
@@ -20,43 +20,24 @@ describe('Get Recos Cluster', () => {
     expect.assertions(1)
     const eb = new Eb().getInstance()
     eb
-      .getRecosForCluster('FAKE_WIDGET_ID', 'FAKE_CLUSTER_ID')
+      .getRecommendationsMulti('FAKE_WIDGET_IDS')
       .catch(err => {
-        expect(err)
-          .toBe('Earlybirds error: Not identified')
-
+        expect(err.message).toBe('Earlybirds error: Not identified')
         done()
       })
   })
 
   it('should return a promise that reject to \
-  "WidgetId is mandatory" if no widgetId \
+  "WidgetIds are mandatory" if no widgetIds \
   is provided', done => {
 
     expect.assertions(1)
     const eb = new Eb().getInstance()
     eb.profile = 'FAKE_PROFILE'
     eb
-      .getRecosForCluster()
+      .getRecommendationsMulti()
       .catch(err => {
-        expect(err.message).toBe('WidgetId is mandatory')
-        done()
-      })
-  })
-
-  it('should return a promise that reject with the\
-    value "Earlybirds error: ClusterId not provided" \
-    if cluster id is not provided', done => {
-
-    expect.assertions(1)
-    const eb = new Eb().getInstance()
-    eb.profile = 'FAKE_PROFILE'
-    eb
-      .getRecosForCluster('FAKE_WIDGET_ID')
-      .catch(err => {
-        expect(err.message)
-          .toBe('Earlybirds error: ClusterId not provided')
-
+        expect(err.message).toBe('WidgetIds are mandatory')
         done()
       })
   })
@@ -65,11 +46,12 @@ describe('Get Recos Cluster', () => {
     expect.assertions(1)
     const eb = new Eb().getInstance('fakeTrackerKey')
     eb.profile = { id : 'fakeProfile' }
-    const res = eb.getRecosForCluster('fakeWidgetId', 'fakeClusterId')
+    const widgetIds = 'id1;id2;id3'
+    const res = eb.getRecommendationsMulti('fakeWidgetIds')
     const expected =
       `${Config.HTTP_PROTOCOL}${Config.API_URL}\/\
-widget/fakeWidgetId/recommendations/\
-cluster/fakeClusterId?rescorerParams={}&variables={}`
+widget/multi/fakeWidgetIds/recommendations/\
+fakeProfile?rescorerParams={}&variables={}`
 
     expect(fetch).toHaveBeenCalledWith(expected)
   })

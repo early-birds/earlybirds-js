@@ -109,6 +109,27 @@ ${Config.API_URL}\
 /recommendations/cluster/${clusterId}`
     return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
       .then(x => x.json())
+      .then(response => {
+        console.warn('response', response)
+      })
+      .catch(err => {
+        throw err;
+      });
+  }
+
+  getRecommendationsMulti(widgetIds, { rescorerParams = {}, variables = {} } = {}) {
+    if (!widgetIds) return Promise.reject(new Error('WidgetIds are mandatory'));
+    if (!this.profile) return Promise.reject(new Error('Earlybirds error: Not identified'));
+    const url = `\
+${Config.HTTP_PROTOCOL}\
+${Config.API_URL}\
+/widget/multi/${widgetIds}\
+/recommendations/${this.profile.id}`
+    return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
+      .then(x => x.json())
+      .then(response => {
+        console.warn('response', response)
+      })
       .catch(err => {
         throw err;
       });
