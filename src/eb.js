@@ -148,6 +148,46 @@ ${Config.API_URL}\
         document.location.href = url;
       });
   }
+
+  getActivities(widgetId, verb) {
+    if (!this.profile) {
+      return new Promise((resolve, reject) => {
+        reject({
+          message: 'Earlybirds error: Not identified'
+        })
+      })
+    }
+    if (!widgetId) {
+      return new Promise((resolve, reject) => {
+        reject({
+          message: 'WidgetId is mandatory'
+        })
+      })
+    }
+    if (!verb) {
+      return new Promise((resolve, reject) => {
+        reject({
+          message: 'Earlybirds error: Verb not provided'
+        })
+      })
+    }
+    const url =
+      `${Config.HTTP_PROTOCOL}\
+${Config.API_URL}/widget/\
+${widgetId}/products-by-verb/\
+${this.profile.id}/${verb}`;
+
+    return fetch(url, {
+      method: 'get'
+    })
+      .then(x => x.json())
+      .catch(err => {
+        console.log('Earlybirds js : ', err.message)
+        return err
+      })
+
+    console.log(url)
+  }
 }
 
 export default makeSingleton(Eb)
