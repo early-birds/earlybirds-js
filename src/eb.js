@@ -109,9 +109,6 @@ ${Config.API_URL}\
 /recommendations/cluster/${clusterId}`
     return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
       .then(x => x.json())
-      .then(response => {
-        console.warn('response', response)
-      })
       .catch(err => {
         throw err;
       });
@@ -127,9 +124,6 @@ ${Config.API_URL}\
 /recommendations/${this.profile.id}`
     return fetch(`${url}?rescorerParams=${JSON.stringify(rescorerParams)}&variables=${JSON.stringify(variables)}`)
       .then(x => x.json())
-      .then(response => {
-        console.warn('response', response)
-      })
       .catch(err => {
         throw err;
       });
@@ -172,7 +166,7 @@ ${Config.API_URL}\
         return response;
       })
       .catch((err) => {
-        console.log('Earlybirds error : trackActivity', err)
+        console.warn('Earlybirds error : trackActivity', err)
         throw err;
       });
   }
@@ -183,7 +177,6 @@ ${Config.API_URL}\
       originalId: id || original_id,
     }).then(() => document.location.href = url)
       .catch((err) => {
-        console.error(err);
         document.location.href = url;
       });
   }
@@ -221,11 +214,9 @@ ${this.profile.id}/${verb}`;
     })
       .then(x => x.json())
       .catch(err => {
-        console.log('Earlybirds js : ', err.message)
+        console.warn('Earlybirds js : ', err.message)
         throw err
       })
-
-    console.log(url)
   }
 }
 
