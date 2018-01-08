@@ -61,6 +61,33 @@ eb.trackActivity({
 })
 ```
 
+### Get Recommendations for a cluster
+If the Early Birds profileId is not known, you can replace it with the couple datasourceId / userId.
+```js
+eb.getRecosForCluster('WIDGET_ID', 'CLUSTER_ID')
+```
+
+### Get recos multi
+Retrieve results from several recommendation widgets.
+```js
+eb.getRecommendationsMulti('WIDGET_IDS')
+```
+
+### Get Last activities
+You can retrieve the list of user last activities, filtered by any verb.
+
+Usage example:
+
+- Retrieve last products liked
+
+- Retrieve last items seen
+
+- Retrieve last buys
+
+```js
+eb.getActivities('WIDGET_IDS', 'VERB')
+```
+
 ## Run the tests
 Tests are made using Jest
 ```bash
