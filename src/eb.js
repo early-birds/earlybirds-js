@@ -2,7 +2,8 @@ import makeSingleton from './utils/singleton';
 import Cookies from './utils/Cookies';
 import Config from '../config';
 import {
-  Encode
+  Encode,
+  getNavigatorSegments,
 } from './utils/Utils';
 import {
   cookieDomainMatchGivenHost,
@@ -10,7 +11,7 @@ import {
 } from './checks/profileValidationCheck';
 
 import {
-  checkActivitiesInputs
+  checkActivitiesInputs,
 } from './checks/trackActivityCheck';
 
 class Eb {
@@ -23,39 +24,55 @@ class Eb {
       expires: 365,
     };
     this.hostname = document.location.hostname;
-    this.profile = this.retrieveEbProfile();
+    this.profile = this.retrieveEbProfile('eb-profile');
     this.trackerKey = trackerKey || null;
   }
 
-  retrieveEbProfile() {
-    return Cookies.getCookie('eb-profile') || null;
+  retrieveEbProfile(cookieName) {
+    let rawProfile = Cookies.getCookie(cookieName) || null;
+    if (rawProfile !== null) {
+      rawProfile = rawProfile.split(':');
+      rawProfile = {
+        id: rawProfile[0],
+        hash: rawProfile[1],
+        lastIdentify: rawProfile[2],
+      };
+      return rawProfile;
+    }
+    return rawProfile;
   }
 
   init(trackerKey) {
     this.trackerKey = trackerKey;
   }
 
-  identify(newProfile = {
-    profile: {},
-  }, options = {
-    cookieDuration: 90,
-  }) {
+  identify(
+    newProfile = { profile: {} },
+    options = { cookieDuration: 3600000 }, // 1 hour in milliseconds : 60 * 60 * 1000
+  ) {
     if (!this.trackerKey) return null;
-    if (shouldInitiateIdentifyRequest(newProfile, this.profile)) {
+
+    if (shouldInitiateIdentifyRequest(
+      newProfile,
+      this.profile,
+      options.cookieDuration,
+    )) {
       return this.identifyRequest(newProfile)
+
         .then((response) => {
           const profile = {
             ...response.profile,
-            lastIdentify: new Date().getTime(),
             hash: Encode(newProfile),
+            lastIdentify: new Date().getTime(),
           };
+
           const cookieConfig =
             cookieDomainMatchGivenHost(response.cookie, this.hostname) ?
-              response.cookie : this.defaultCookieConfig;
+              response.cookie : this.defaultCookieConfig.expires;
 
           Cookies.setCookie(
             'eb-profile',
-            `${profile.id}:${profile.hash}:${profile.lastUpdate}`,
+            `${profile.id}:${profile.hash}:${profile.lastIdentify}`,
             cookieConfig,
           );
 
@@ -72,13 +89,13 @@ class Eb {
   identifyRequest(profile) {
     const url = `${Config.HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/identify`;
     return fetch(url, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profile),
-      })
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profile),
+    })
       .then(x => x.json());
   }
 
@@ -131,40 +148,10 @@ class Eb {
       });
   }
 
-  static getNavigatorSegments() {
-    const segments = {
-      navigator_appCodeName: window.navigator.appCodeName,
-      navigator_appName: window.navigator.appName,
-      navigator_appVersion: window.navigator.appVersion,
-      navigator_cookieEnabled: window.navigator.cookieEnabled,
-      navigator_doNotTrack: window.navigator.doNotTrack,
-      navigator_language: window.navigator.language,
-      navigator_platform: window.navigator.platform,
-      navigator_product: window.navigator.product,
-      navigator_productSub: window.navigator.productSub,
-      navigator_userAgent: window.navigator.userAgent,
-      navigator_vendor: window.navigator.vendor,
-      navigator_vendorSub: window.navigator.vendorSub,
-    };
-
-    try {
-      window.localStorage.setItem('testeb', 'testeb');
-      window.localStorage.removeItem('testeb');
-      segments.navigator_localStorageEnabled = true;
-    } catch (e) {
-      segments.navigator_localStorageEnabled = false;
-    }
-
-    if (window.screen.width && window.screen.height) {
-      segments.screen_resolution = `${window.screen.width}x${window.screen.height}`;
-    }
-
-    return segments;
-  }
 
   trackActivity(activities) {
     if (!activities) {
-      return Promise.reject(new Error('no activities provided'))
+      return Promise.reject(new Error('no activities provided'));
     }
 
     if (!Array.isArray(activities)) {
@@ -183,7 +170,7 @@ class Eb {
 
     const url = `${Config.HTTP_PROTOCOL}${Config.API_URL}/tracker/${this.trackerKey}/activity`;
 
-    const segments = Eb.getNavigatorSegments();
+    const userSegments = getNavigatorSegments();
 
     return fetch(url, {
       method: 'post',
@@ -191,8 +178,8 @@ class Eb {
         activity: activities.map(x => ({
           ...x,
           profile: this.profile.id,
-          segments,
         })),
+        segments: userSegments,
       }),
     })
       .then(x => x.json())

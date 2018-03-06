@@ -2,7 +2,7 @@ import Eb from '../eb'
 import Mock from '../../tests/mock'
 import Cookies from '../utils/Cookies'
 import Config from '../../config'
-import { Encode } from '../utils/Utils'
+import { Encode, getNavigatorSegments } from '../utils/Utils'
 
 beforeEach(() => {
   new Eb().reset()
@@ -45,9 +45,12 @@ describe('Track Activity', () => {
   })
 
   it('should make a http request if inputs are ok then set the eb-lastactivity-hash cookie (happy path)', done => {
-    expect.assertions(2)
+    expect.assertions(2);
+    
     const eb = new Eb().getInstance('fakeTrackerKey')
     eb.profile = { id: 'FAKE_ID' }
+
+    const userSegments = getNavigatorSegments();
     const fakeInputs = [
       {
         profile: 'FAKE_ID',
@@ -68,7 +71,8 @@ describe('Track Activity', () => {
       {
         method: 'post',
         body: JSON.stringify({
-          activity: fakeInputs
+          activity: fakeInputs,
+          segments: userSegments,
         })
       }
     )
@@ -76,6 +80,10 @@ describe('Track Activity', () => {
 
   it('should not make an http request if eb-lastactivity-hash cookie is not new', () => {
     expect.assertions(1)
+    
+    const eb = new Eb().getInstance('fakeTrackerKey')
+    eb.profile = { id: 'FAKE_ID' }
+    
     const fakeInputs = [
       {
         profile: 'FAKE_PROFILE',
@@ -86,7 +94,6 @@ describe('Track Activity', () => {
     const fakeHash = Encode(JSON.stringify(fakeInputs))
     Cookies.getCookie = jest.fn(() => fakeHash)
 
-    const eb = new Eb().getInstance()
     eb.trackActivity(fakeInputs)
     expect(fetch).not.toBeCalled()
   })
