@@ -103,7 +103,7 @@ describe('Earlybirds class', () => {
         Cookies.getCookie = jest.fn(() => 'fakeCookie')
 
         const eb = new Eb().getInstance()
-        expect(eb.retrieveEbProfile()).toEqual('fakeCookie')
+        expect(eb.retrieveEbProfile()).toEqual({"hash": undefined, "id": "fakeCookie", "lastIdentify": undefined})
       })
 
       it('should return null if eb-cookie does not exist', () => {
@@ -120,7 +120,7 @@ describe('Earlybirds class', () => {
 
         const eb = new Eb().getInstance()
         expect(eb.profile).toBeDefined()
-        expect(eb.profile).toEqual('fakeCookie')
+        expect(eb.profile).toEqual({"hash": undefined, "id": "fakeCookie", "lastIdentify": undefined})
       })
     })
     it('should implement a init method that set the trackerKey attribute with the given value', () => {

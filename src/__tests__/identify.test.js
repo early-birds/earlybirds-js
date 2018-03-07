@@ -77,12 +77,13 @@ describe('Identify', () => {
       }
 
       fetch.mockResponse(JSON.stringify(fakeResponse))
+
       const expectedResult = {
         ...fakeResponse.profile,
+        hash: Encode(Mock.FAKE_PROFILE),
         lastIdentify: 0,
-        hash: Encode(Mock.FAKE_PROFILE)
       }
-      let fakeCookieExpected = JSON.stringify(expectedResult)
+      let fakeCookieExpected = `${expectedResult.id}:${expectedResult.hash}:${expectedResult.lastIdentify}`
 
       const eb = new Eb().getInstance('fakeTrackerKey')
       eb
@@ -90,7 +91,7 @@ describe('Identify', () => {
         .then(response => {
           // set eb profile cookie
           expect(Cookies.setCookie)
-            .toBeCalledWith('eb-profile', fakeCookieExpected, eb.defaultCookieConfig)
+            .toBeCalledWith('eb-profile', fakeCookieExpected, eb.defaultCookieConfig.expires)
           // update eb profile
           expect(eb.profile).toEqual(expectedResult)
           done()
@@ -116,10 +117,10 @@ describe('Identify', () => {
       fetch.mockResponse(JSON.stringify(fakeResponse))
       const expectedResult = {
         ...fakeResponse.profile,
+        hash: Encode(Mock.FAKE_PROFILE),
         lastIdentify: 0,
-        hash: Encode(Mock.FAKE_PROFILE)
       }
-      let fakeCookieExpected = JSON.stringify(expectedResult)
+      let fakeCookieExpected = `${expectedResult.id}:${expectedResult.hash}:${expectedResult.lastIdentify}`
 
       const eb = new Eb().getInstance('fakeTrackerKey')
       eb.hostname = 'fakeDomain'

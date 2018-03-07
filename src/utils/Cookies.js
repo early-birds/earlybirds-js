@@ -1,28 +1,32 @@
 function Cookies() {}
-Cookies.retrieveCookie = function(name) {
+
+Cookies.retrieveCookie = function retrieveCookie(name) {
   const nameEQ = `${name}=`;
   const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
+  for (let i = 0; i < ca.length; i += 1) {
     let c = ca[i];
     while (c.charAt(0) === ' ') c = c.substring(1, c.length);
     if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
   }
-}
-Cookies.getCookie = function(name) {
-  const retrievedCookie = this.retrieveCookie(name)
+  return null;
+};
+
+Cookies.getCookie = function getCookie(name) {
   try {
-    return JSON.parse(retrievedCookie);
+    return JSON.parse(this.retrieveCookie(name));
   } catch (e) {
-    return retrievedCookie || null;
+    return this.retrieveCookie(name);
   }
-}
-Cookies.setCookie = function(name, value, days) {
+};
+
+Cookies.setCookie = function setCookie(name, value, days) {
   let expires = '';
   if (days !== null) {
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    expires = `; expires=${date.toUTCString()}`;
+    expires = `${date.toUTCString()}`;
   }
-  document.cookie = `${name}=${value}${expires}; path=/`;
-}
-export default Cookies
+  document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+};
+
+export default Cookies;
