@@ -202,10 +202,12 @@ class Eb {
     },
     id,
     url,
-  }) {
+  }, idWidget, productType = 'product') {
     this.trackActivity({
       verb: 'click-on-reco',
       originalId: id || original_id,
+      widgetId: idWidget,
+      type: productType,
     })
       .then(() => document.location.href = url)
       .catch((err) => {
