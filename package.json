@@ -12,7 +12,7 @@
     "webpack-dev-server": "^2.9.5"
   },
   "name": "earlybirds-js",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "main": "index.js",
   "directories": {
     "test": "tests"
