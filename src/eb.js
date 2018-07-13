@@ -51,7 +51,10 @@ class Eb {
     options = { cookieDuration: 3600000 }, // 1 hour in milliseconds : 60 * 60 * 1000
   ) {
     if (!this.trackerKey) return null;
-
+    if (this.profile && this.profile.id && this.profile.id !== ''
+    && !newProfile.profile.datasources){
+      newProfile.profile.id = this.profile.id;
+    }
     if (shouldInitiateIdentifyRequest(
       newProfile,
       this.profile,
